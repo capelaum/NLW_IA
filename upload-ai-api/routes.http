@@ -1,0 +1,37 @@
+# @name get-prompts
+GET http://localhost:3333/prompts
+
+###
+
+# @name upload-video
+POST http://localhost:3333/videos
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="audio2.mp3"
+Content-Type: audio/mpeg
+
+< ./audio2.mp3
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+# @name create-transcription
+POST http://localhost:3333/videos/0536f7ff-16ac-46a9-bfd1-5cf11fe6fddf/transcription
+Content-Type: application/json
+
+{
+  "prompt": "Otorrino da asa norte"
+}
+
+###
+
+# @name generate-ai-completion
+POST http://localhost:3333/ai/completion
+Content-Type: application/json
+
+{
+  "videoId": "0536f7ff-16ac-46a9-bfd1-5cf11fe6fddf",
+  "temperature": 0.5,
+  "template": "Gere um resumo sucinto da transcrição do vídeo informada a seguir: '''{transcription}'''"
+}
