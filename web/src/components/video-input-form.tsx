@@ -1,15 +1,47 @@
+import { api } from '@/lib/axios'
 import { loadFFmpeg } from '@/lib/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
-import { FileVideo, Upload } from 'lucide-react'
+import { CheckCircle, FileVideo, Loader2, Upload } from 'lucide-react'
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Textarea } from './ui/textarea'
 
+type Status = 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
+
+const statusMessages = {
+  waiting: {
+    message: 'Carregar vídeo',
+    icon: <Upload className="ml-2 h-4 w-4" />
+  },
+  converting: {
+    message: 'Convertendo...',
+    icon: <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+  },
+  uploading: {
+    message: 'Carregando...',
+    icon: <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+  },
+  generating: {
+    message: 'Transcrevendo...',
+    icon: <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+  },
+  success: {
+    message: 'Sucesso!',
+    icon: <CheckCircle className="ml-2 h-4 w-4" />
+  }
+}
+
+const pendingStatus = ['converting', 'uploading', 'generating']
+
 export function VideoInputForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [prompt, setPrompt] = useState('')
+  const [status, setStatus] = useState<Status>('waiting')
+
+  const isSubmitButtonDisabled =
+    !videoFile || !prompt || pendingStatus.includes(status)
 
   function handleFileSelected(e: ChangeEvent<HTMLInputElement>) {
     const { files } = e.currentTarget
@@ -72,9 +104,28 @@ export function VideoInputForm() {
       return
     }
 
-    const audioFile = await convertVideoToAudio(videoFile)
+    setStatus('converting')
 
-    console.log(audioFile, prompt)
+    const audioFile = await convertVideoToAudio(videoFile)
+    const data = new FormData()
+    data.append('file', audioFile)
+
+    setStatus('uploading')
+
+    const response = await api.post('/videos', data)
+    const videoId = response.data.video.id
+
+    setStatus('generating')
+
+    await api.post(`/videos/${videoId}/transcription`, {
+      prompt
+    })
+
+    setStatus('success')
+
+    setTimeout(() => {
+      setStatus('waiting')
+    }, 5000)
   }
 
   const previewUrl = useMemo(() => {
@@ -121,6 +172,7 @@ export function VideoInputForm() {
 
         <Textarea
           value={prompt}
+          disabled={status !== 'waiting'}
           onChange={(e) => setPrompt(e.target.value)}
           id="transcription_prompt"
           className="max-h-[200px] min-h-[100px] text-sm leading-relaxed"
@@ -130,12 +182,13 @@ export function VideoInputForm() {
 
       <Button
         type="submit"
-        className="w-full"
-        disabled={!videoFile || !prompt}
+        data-success={status === 'success'}
+        disabled={isSubmitButtonDisabled}
         title="Carregar vídeo"
+        className="w-full data-[success=true]:bg-emerald-600"
       >
-        <Upload className="mr-2 h-4 w-4" />
-        Carregar vídeo
+        {statusMessages[status].message}
+        {statusMessages[status].icon}
       </Button>
     </form>
   )
