@@ -6,6 +6,10 @@ import { Textarea } from './components/ui/textarea'
 import { VideoInputForm } from './components/video-input-form'
 
 export function App() {
+  function handlePromptSelected(template: string) {
+    console.log('💥 ~ template:', template)
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-3">
@@ -55,7 +59,7 @@ export function App() {
 
           <Separator />
 
-          <PromptInputForm />
+          <PromptInputForm onPromptSelected={handlePromptSelected} />
         </aside>
       </main>
     </div>

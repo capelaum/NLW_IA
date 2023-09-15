@@ -1,4 +1,6 @@
 import { Wand2 } from 'lucide-react'
+import { useState } from 'react'
+import { PromptSelect } from './prompt-select'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 import {
@@ -11,21 +13,18 @@ import {
 import { Separator } from './ui/separator'
 import { Slider } from './ui/slider'
 
-export function PromptInputForm() {
+interface PromptInputFormProps {
+  onPromptSelected: (template: string) => void
+}
+
+export function PromptInputForm({ onPromptSelected }: PromptInputFormProps) {
+  const [temperature, setTemperature] = useState(0.5)
+
   return (
     <form className="space-y-5">
       <div className="space-y-2">
         <Label>Prompt</Label>
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione um prompt..." />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="title">Título do Youtube</SelectItem>
-            <SelectItem value="description">Descrição do Youtube</SelectItem>
-          </SelectContent>
-        </Select>
+        <PromptSelect onPromptSelected={onPromptSelected} />
       </div>
 
       <div className="space-y-2">
@@ -50,7 +49,13 @@ export function PromptInputForm() {
       <div className="space-y-4">
         <Label>Temperatura</Label>
 
-        <Slider min={0} max={1} step={0.1} defaultValue={[0.5]} />
+        <Slider
+          min={0}
+          max={1}
+          step={0.1}
+          value={[temperature]}
+          onValueChange={(value) => setTemperature(value[0])}
+        />
 
         <span className="block text-xs italic leading-relaxed text-muted-foreground">
           Valores mais altos tendem a deixar o resultado mais criativo, porém
