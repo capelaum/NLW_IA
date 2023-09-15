@@ -1,3 +1,4 @@
+import { useCompletion } from 'ai/react'
 import { Github, PlayCircle } from 'lucide-react'
 import { useState } from 'react'
 import { PromptInputForm } from './components/prompt-input-form'
@@ -10,9 +11,23 @@ export function App() {
   const [temperature, setTemperature] = useState(0.5)
   const [videoId, setVideoId] = useState<string | null>(null)
 
-  function handlePromptSelected(template: string) {
-    console.log('💥 ~ template:', template)
-  }
+  const {
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    completion,
+    isLoading
+  } = useCompletion({
+    api: 'http://localhost:3333/ai/completion',
+    body: {
+      videoId,
+      temperature
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -42,11 +57,14 @@ export function App() {
             <Textarea
               className="resize-none p-4 leading-relaxed"
               placeholder="Inclua o prompt para a IA..."
+              value={input}
+              onChange={handleInputChange}
             />
             <Textarea
               className="resize-none p-4 leading-relaxed"
               placeholder="Resultado gerado pela IA..."
               readOnly
+              value={completion}
             />
           </div>
 
@@ -64,7 +82,9 @@ export function App() {
           <Separator />
 
           <PromptInputForm
-            onPromptSelected={handlePromptSelected}
+            isLoading={isLoading}
+            handleSubmit={handleSubmit}
+            onPromptSelected={setInput}
             temperature={temperature}
             setTemperature={setTemperature}
           />

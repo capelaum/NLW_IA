@@ -1,4 +1,5 @@
 import { Wand2 } from 'lucide-react'
+import { FormEvent } from 'react'
 import { PromptSelect } from './prompt-select'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
@@ -16,15 +17,19 @@ interface PromptInputFormProps {
   onPromptSelected: (template: string) => void
   temperature: number
   setTemperature: (temperature: number) => void
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => void
+  isLoading: boolean
 }
 
 export function PromptInputForm({
   onPromptSelected,
   temperature,
-  setTemperature
+  setTemperature,
+  handleSubmit,
+  isLoading
 }: PromptInputFormProps) {
   return (
-    <form className="space-y-5">
+    <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label>Prompt</Label>
         <PromptSelect onPromptSelected={onPromptSelected} />
@@ -68,7 +73,7 @@ export function PromptInputForm({
 
       <Separator />
 
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={isLoading}>
         <Wand2 className="mr-2 h-4 w-4" />
         Executar
       </Button>
