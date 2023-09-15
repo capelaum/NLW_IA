@@ -1,4 +1,5 @@
 import { Github, PlayCircle } from 'lucide-react'
+import { useState } from 'react'
 import { PromptInputForm } from './components/prompt-input-form'
 import { Button } from './components/ui/button'
 import { Separator } from './components/ui/separator'
@@ -6,6 +7,9 @@ import { Textarea } from './components/ui/textarea'
 import { VideoInputForm } from './components/video-input-form'
 
 export function App() {
+  const [temperature, setTemperature] = useState(0.5)
+  const [videoId, setVideoId] = useState<string | null>(null)
+
   function handlePromptSelected(template: string) {
     console.log('💥 ~ template:', template)
   }
@@ -55,11 +59,15 @@ export function App() {
         </div>
 
         <aside className="w-80 space-y-6">
-          <VideoInputForm />
+          <VideoInputForm setVideoId={setVideoId} />
 
           <Separator />
 
-          <PromptInputForm onPromptSelected={handlePromptSelected} />
+          <PromptInputForm
+            onPromptSelected={handlePromptSelected}
+            temperature={temperature}
+            setTemperature={setTemperature}
+          />
         </aside>
       </main>
     </div>

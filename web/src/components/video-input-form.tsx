@@ -35,7 +35,11 @@ const statusMessages = {
 
 const pendingStatus = ['converting', 'uploading', 'generating']
 
-export function VideoInputForm() {
+interface VideoInputFormProps {
+  setVideoId: (videoId: string) => void
+}
+
+export function VideoInputForm({ setVideoId }: VideoInputFormProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [prompt, setPrompt] = useState('')
   const [status, setStatus] = useState<Status>('waiting')
@@ -120,6 +124,8 @@ export function VideoInputForm() {
     await api.post(`/videos/${videoId}/transcription`, {
       prompt
     })
+
+    setVideoId(videoId)
 
     setStatus('success')
 
