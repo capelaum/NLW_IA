@@ -1,5 +1,5 @@
-import { Wand2 } from 'lucide-react'
-import { FormEvent } from 'react'
+import { useForm } from '@/contexts/form-context'
+import { Loader2, Wand2 } from 'lucide-react'
 import { PromptSelect } from './prompt-select'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
@@ -13,26 +13,20 @@ import {
 import { Separator } from './ui/separator'
 import { Slider } from './ui/slider'
 
-interface PromptInputFormProps {
-  onPromptSelected: (template: string) => void
-  temperature: number
-  setTemperature: (temperature: number) => void
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => void
-  isLoading: boolean
-}
+export function PromptInputForm() {
+  const {
+    temperature,
+    setTemperature,
+    isGeneratePromptButtonDisabled,
+    handleSubmit,
+    isAICompletionLoading
+  } = useForm()
 
-export function PromptInputForm({
-  onPromptSelected,
-  temperature,
-  setTemperature,
-  handleSubmit,
-  isLoading
-}: PromptInputFormProps) {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label>Prompt</Label>
-        <PromptSelect onPromptSelected={onPromptSelected} />
+        <PromptSelect />
       </div>
 
       <div className="space-y-2">
@@ -54,8 +48,13 @@ export function PromptInputForm({
 
       <Separator />
 
-      <div className="space-y-4">
-        <Label>Temperatura</Label>
+      <div className="relative space-y-4">
+        <Label className="flex justify-between">
+          Temperatura
+          <span className="text-sm font-semibold text-muted-foreground">
+            {temperature}
+          </span>
+        </Label>
 
         <Slider
           min={0}
@@ -73,8 +72,16 @@ export function PromptInputForm({
 
       <Separator />
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        <Wand2 className="mr-2 h-4 w-4" />
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isGeneratePromptButtonDisabled}
+      >
+        {isAICompletionLoading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Wand2 className="mr-2 h-4 w-4" />
+        )}
         Executar
       </Button>
     </form>

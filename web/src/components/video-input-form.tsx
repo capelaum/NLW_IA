@@ -1,14 +1,13 @@
+import { useForm } from '@/contexts/form-context'
 import { api } from '@/lib/axios'
 import { loadFFmpeg } from '@/lib/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import { CheckCircle, FileVideo, Loader2, Upload } from 'lucide-react'
-import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, useMemo } from 'react'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Textarea } from './ui/textarea'
-
-type Status = 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
 
 const statusMessages = {
   waiting: {
@@ -33,19 +32,17 @@ const statusMessages = {
   }
 }
 
-const pendingStatus = ['converting', 'uploading', 'generating']
-
-interface VideoInputFormProps {
-  setVideoId: (videoId: string) => void
-}
-
-export function VideoInputForm({ setVideoId }: VideoInputFormProps) {
-  const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [prompt, setPrompt] = useState('')
-  const [status, setStatus] = useState<Status>('waiting')
-
-  const isSubmitButtonDisabled =
-    !videoFile || !prompt || pendingStatus.includes(status)
+export function VideoInputForm() {
+  const {
+    setVideoId,
+    videoFile,
+    setVideoFile,
+    transcriptionPrompt,
+    setTranscriptionPrompt,
+    status,
+    setStatus,
+    isVideouploadButtonDisabled
+  } = useForm()
 
   function handleFileSelected(e: ChangeEvent<HTMLInputElement>) {
     const { files } = e.currentTarget
@@ -104,7 +101,7 @@ export function VideoInputForm({ setVideoId }: VideoInputFormProps) {
   async function handleUploadVideo(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (!videoFile || !prompt) {
+    if (!videoFile || !transcriptionPrompt) {
       return
     }
 
@@ -122,7 +119,7 @@ export function VideoInputForm({ setVideoId }: VideoInputFormProps) {
     setStatus('generating')
 
     await api.post(`/videos/${videoId}/transcription`, {
-      prompt
+      prompt: transcriptionPrompt
     })
 
     setVideoId(videoId)
@@ -177,9 +174,9 @@ export function VideoInputForm({ setVideoId }: VideoInputFormProps) {
         <Label htmlFor="transcription_prompt">Prompt de transcrição</Label>
 
         <Textarea
-          value={prompt}
+          value={transcriptionPrompt}
           disabled={status !== 'waiting'}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={(e) => setTranscriptionPrompt(e.target.value)}
           id="transcription_prompt"
           className="max-h-[200px] min-h-[100px] text-sm leading-relaxed"
           placeholder="Inclua palavras-chave mencionadas no vídeo separadas por vírgula (,)"
@@ -189,7 +186,7 @@ export function VideoInputForm({ setVideoId }: VideoInputFormProps) {
       <Button
         type="submit"
         data-success={status === 'success'}
-        disabled={isSubmitButtonDisabled}
+        disabled={isVideouploadButtonDisabled}
         title="Carregar vídeo"
         className="w-full data-[success=true]:bg-emerald-600"
       >

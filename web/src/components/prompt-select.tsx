@@ -1,3 +1,4 @@
+import { useForm } from '@/contexts/form-context'
 import { api } from '@/lib/axios'
 import { useEffect, useState } from 'react'
 import {
@@ -14,12 +15,10 @@ interface Prompt {
   template: string
 }
 
-interface PromptSelectProps {
-  onPromptSelected: (template: string) => void
-}
-
-export function PromptSelect({ onPromptSelected }: PromptSelectProps) {
+export function PromptSelect() {
   const [prompts, setPrompts] = useState<Prompt[] | null>(null)
+
+  const { setInput } = useForm()
 
   useEffect(() => {
     api.get('/prompts').then((response) => setPrompts(response.data))
@@ -32,7 +31,7 @@ export function PromptSelect({ onPromptSelected }: PromptSelectProps) {
       return
     }
 
-    onPromptSelected(selectedPrompt.template)
+    setInput(selectedPrompt.template)
   }
 
   return (

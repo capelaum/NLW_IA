@@ -1,33 +1,13 @@
-import { useCompletion } from 'ai/react'
 import { Github, PlayCircle } from 'lucide-react'
-import { useState } from 'react'
 import { PromptInputForm } from './components/prompt-input-form'
 import { Button } from './components/ui/button'
 import { Separator } from './components/ui/separator'
 import { Textarea } from './components/ui/textarea'
 import { VideoInputForm } from './components/video-input-form'
+import { useForm } from './contexts/form-context'
 
 export function App() {
-  const [temperature, setTemperature] = useState(0.5)
-  const [videoId, setVideoId] = useState<string | null>(null)
-
-  const {
-    input,
-    setInput,
-    handleInputChange,
-    handleSubmit,
-    completion,
-    isLoading
-  } = useCompletion({
-    api: 'http://localhost:3333/ai/completion',
-    body: {
-      videoId,
-      temperature
-    },
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+  const { input, handleInputChange, completion } = useForm()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -77,17 +57,11 @@ export function App() {
         </div>
 
         <aside className="w-80 space-y-6">
-          <VideoInputForm setVideoId={setVideoId} />
+          <VideoInputForm />
 
           <Separator />
 
-          <PromptInputForm
-            isLoading={isLoading}
-            handleSubmit={handleSubmit}
-            onPromptSelected={setInput}
-            temperature={temperature}
-            setTemperature={setTemperature}
-          />
+          <PromptInputForm />
         </aside>
       </main>
     </div>
